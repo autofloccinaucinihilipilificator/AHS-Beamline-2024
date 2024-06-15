@@ -23,9 +23,9 @@ def calc_lambda(theta, phi, D, beam_energy, n=-1):
 
 
 if __name__ == '__main__':
-    D = 8.33e-7     # Grating period in m
-    beam_energy = 1 # in GeV
-    n = -1          # Diffraction index
+    D = float(input('Enter grating period in nm: ')) * 1e-9  # in m
+    beam_energy = int(input('Enter beam energy in GeV: '))   # in GeV
+    n = int(input('Enter diffraction index: '))              # Diffraction index
 
     thetas, phis = np.meshgrid(np.linspace(-np.pi / 2, np.pi / 2, 101), np.linspace(0, np.pi/2, 51))
     lambdas = np.array([[1e9 * calc_lambda(theta, phi[0], D, beam_energy, n) for theta in thetas[0]] for phi in phis])
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     cbar = figure.colorbar(chart)
     cbar.set_label('Wavelength (nm)', rotation=270, labelpad=12)
 
-    axes.set_title('Expected wavelength of Smith-Purcell radiation of diffraction order -1 \nas a function of emission angles θ and Φ \
-    \nwith grating period 833 nm and beam energy 1 GeV')
+    axes.set_title(f'Expected wavelength of Smith-Purcell radiation \nof diffraction order {n} as a function of emission angles θ and Φ \
+    \nwith grating period {int(D * 1e9)} nm and beam energy {beam_energy} GeV')
     axes.set_xlabel('θ (rad)')
     axes.set_ylabel('Φ (rad)')
 
