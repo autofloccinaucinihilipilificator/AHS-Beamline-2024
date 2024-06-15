@@ -1,4 +1,4 @@
-# Smith-Purcell Radiation Wavelength calculator and grapher
+# Smith-Purcell Radiation wavelength calculator and grapher
 # For the AHS Physics Club
 
 import numpy as np
