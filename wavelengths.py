@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# Get velocity as a fraction of c from energy in GeV
+# Get velocity as a fraction of c from electron energy in GeV
 def calc_beta(E):
     # c = 1  # Speed of light
     m = 5.11e-4  # Electron mass in GeV

@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Get velocity as a fraction of c from electron energy in GeV
 def calc_beta(E):
     # c = 1  # Speed of light
@@ -15,6 +16,7 @@ def calc_beta(E):
 def calc_lambda(theta, phi, D, beam_energy, n=-1):
     beta = calc_beta(beam_energy)
     return (D / np.abs(n)) * (1 / beta - np.cos(theta) * np.sin(phi))
+
 
 def calc_distribution(I, n, L, D, eps_0, theta, phi, beam_energy, d):
     beta = calc_beta(beam_energy)
@@ -29,6 +31,7 @@ def calc_distribution(I, n, L, D, eps_0, theta, phi, beam_energy, d):
     term3 = R_n**2
     term4 = np.exp((-1 * d / h_int) * np.sqrt(1 + (beta * gamma * np.cos(phi))**2))
     return term1 * term2 * term3 * term4
+
 
 if __name__ == '__main__':
     print('Hello world!')
