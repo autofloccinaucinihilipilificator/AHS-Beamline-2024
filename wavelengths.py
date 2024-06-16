@@ -30,10 +30,6 @@ if __name__ == '__main__':
     thetas, phis = np.meshgrid(np.linspace(-np.pi / 2, np.pi / 2, 101), np.linspace(0, np.pi / 2, 51))
     lambdas = np.array([[1e9 * calc_lambda(theta, phi[0], D, beam_energy, n) for theta in thetas[0]] for phi in phis])
 
-    print('thetas:', thetas)
-    print('phis:', phis)
-    print('lambdas:', lambdas)
-
     cmap = 'Spectral'
 
     figure, axes = plt.subplots()
@@ -42,8 +38,9 @@ if __name__ == '__main__':
     cbar = figure.colorbar(chart)
     cbar.set_label('Wavelength (nm)', rotation=270, labelpad=12)
 
-    axes.set_title(f'Expected wavelength of Smith-Purcell radiation \nof diffraction order {n} as a function of emission angles θ and Φ \
-    \nwith grating period {int(D * 1e9)} nm and beam energy {beam_energy} GeV')
+    axes.set_title(f'Expected wavelength of Smith-Purcell radiation \nof diffraction order {n} \
+as a function of emission angles θ and Φ \
+\nwith grating period {int(D * 1e9)} nm and beam energy {beam_energy} GeV')
     axes.set_xlabel('Φ (rad)')
     axes.set_ylabel('θ (rad)')
 
