@@ -19,25 +19,14 @@ def calc_lambda(theta, phi, D, beta, n=-1):
 
 # Calculate R_n when phi = 0
 def calc_R_n2(theta, D, beta, n, h, alpha):
-    gamma = 1 / np.sqrt(1 - beta ** 2)
+    k = 2 * np.pi * n / (1 / beta - np.cos(theta))
 
-    lambda_this = calc_lambda(theta, 0, D, beta, n)
+    # term1 = (1 / (np.sin(theta) - np.tan(alpha) * (1 + np.cos(theta))))**2
+    # term2 = np.tan(alpha)**2 * np.sin(theta)**2
+    # term3 = np.sinc(k * h * np.sin(theta) / (2 * np.pi))**2
+    # return term1 * term2 * term3
 
-    lambda_e = (lambda_this / (2 * np.pi)) * (
-                (beta * gamma) / (1 + beta ** 2 * gamma ** 2 * np.sin(theta) ** 2 * np.sin(0) ** 2))
 
-    l = h / np.tan(alpha)
-
-    k = 2 * np.pi * n / (l * (1 / beta - np.tan(theta)))
-
-    return (2
-            * beta ** 2 / (k ** 2 * D ** 2)
-            * np.sin(theta - alpha) ** 2
-            / ((1 - beta * np.cos(theta)) * (1 - beta * np.cos(theta - 2 * alpha)))
-            * np.exp((2 * l - D) / lambda_e)
-            * (np.cosh(0 * np.tan(alpha) / lambda_e) - np.cos(
-                (1 / beta - (np.cos(theta - alpha) / np.cos(alpha))) * k * 0))
-            )
 
 
 # Calculate angular power distribution of SPR radiation along normal plane (phi = 0)
@@ -52,33 +41,18 @@ def calc_R_n2(theta, D, beta, n, h, alpha):
 # E - Beam energy (GeV)
 # d - Height of beam above grating (m)
 def calc_distribution(theta, I, n, L, D, alpha, h, E, d, S_inc):
-    phi = 0
-
-    beta = calc_beta(E)
-    gamma = 1 / np.sqrt(1 - beta ** 2)
-    lambda_this = calc_lambda(theta, phi, D, beta, n)
-
-    # Elementary charge
-    q = 1.602e-19
-
-    lambda_e = lambda_this / (2 * np.pi) * beta * gamma
-
-    R_n2 = calc_R_n2(theta, D, beta, n, h, alpha)
-
-    term2 = (n ** 2 * beta ** 3) / (1 - beta * np.cos(theta)) ** 3
-
-    return 2 * np.pi * q ** 2 * I * L / (D ** 2) * term2 * R_n2 * np.exp(-2 * d / lambda_e) * S_inc
+    pass
 
 
 if __name__ == '__main__':
-    print('Don\'t use this graph! Make sure the variable values are correct.')
 
-    I = 7e-2  # Beam current (A)
-    n = 1  # Diffraction order
-    L = 2.5e-2  # Total grating length (m)
-    D = 8.33e-7  # Grating period (m)
-    E = 1  # Beam energy (GeV)
-    d = 1.6e-4  # Height of beam above grating (m)
+
+    I = 7e-2        # Beam current (A)
+    n = 1           # Diffraction order
+    L = 1e-2      # Total grating length (m)
+    D = 6.58e-4     # Grating period (m)
+    # E = 1           # Beam energy (GeV)
+    d = 1.6e-3      # Height of beam above grating (m)
 
     # ATTN: Get exact exact values from manufacturer
     alpha = np.pi / 36  # Blaze angle of echelle grating
@@ -89,11 +63,12 @@ if __name__ == '__main__':
     # Please send help :)
     S_inc = 1.27e-4
 
+    # temp
+    beta = np.sqrt(1 - 1 / 1000**2)
+
     thetas = np.linspace(0, np.pi / 2, 501)
 
-    power_dist = np.array([calc_distribution(theta, I, n, L, D, alpha, h, E, d, S_inc) for theta in thetas])
-
-    R_ns = np.array([calc_R_n2(theta, D, calc_beta(E), n, h, alpha) for theta in thetas])
+    R_ns = np.array([calc_R_n2(theta, D, beta, n, h, alpha) for theta in thetas])
 
     print(R_ns)
 
