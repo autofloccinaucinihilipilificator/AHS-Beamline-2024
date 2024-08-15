@@ -18,7 +18,7 @@ def calc_lambda(theta, phi, D, beta, n=-1):
     return (D / np.abs(n)) * (1 / beta - np.cos(theta) * np.sin(phi))
 
 
-def calc_lambda_e(lambda_this, beta, gamma, theta, phi):
+def calc_lambda_e(beta, gamma, theta, phi):
     term1 = calc_lambda(theta, phi, D, beta, n) / (2 * np.pi)
     term2 = (beta * gamma) / (np.sqrt(1 + beta**2 * gamma**2 * np.sin(theta)**2 * np.sin(phi)**2))
     return term1 * term2
@@ -51,57 +51,52 @@ def calc_R_n2(theta, beta, n, h, alpha):
 # n - Diffraction order
 # L - Total length of grating (m)
 # D - Grating period (m)
-# alpha - Blaze angle of echelle grating
+# alpha - Blaze angle of echelle grating (rad)
 # h - Height of grating (peak to trough)
 # E - Beam energy (GeV)
 # d - Height of beam above grating (m)
-def calc_distribution(theta, I, n, L, D, alpha, h, E, d, S_inc):
+def calc_distribution(theta, n, L, D, alpha, h, E, d):
     beta = calc_beta(E)
     gamma = 1 / np.sqrt(1 - beta**2)
 
     lambda_this = calc_lambda(theta, 0, D, beta, n)
-    lambda_e = calc_lambda_e(lambda_this, beta, gamma, theta, 0)
-    q = 1.602e-19
 
-    term1 = 2 * np.pi * q**2
-    term2 = L / D**2
-    term3 = n**2 * beta**3 / (1 - beta * np.cos(theta))**3
-    term4 = calc_R_n2(theta, beta, n, h, alpha)
-    term5 = np.exp(-2 * d / lambda_e)
+    h_int = lambda_this * beta * gamma / (4 * np.pi)
 
-    return term1 * term2 * term3 * term4 * term5
+    term1 = 1 / 137 * np.abs(n) * L / D
+    term2 = np.sin(theta)**2 / (1 / beta - np.cos(theta))**2
+    term3 = calc_R_n2(theta, beta, n, h, alpha)
+    term4 = np.exp(d / h_int)
+
+    return term1 * term2 * term3 * term4
 
 
 if __name__ == '__main__':
 
-    I = 5.8e-6      # Beam current in A
-    n = 1           # Diffraction order
+    # n = 1           # Diffraction order
     L = 5.74e-1     # Total grating length (m)
     D = 6.58e-4     # Grating period (m)
     E = 0.855       # Beam energy (GeV)
     d = 1.27e-4      # Height of beam above grating (m)
-
-    # ATTN: Get exact exact values from manufacturer
     alpha = np.pi / 36  # Blaze angle of echelle grating
     h = 0.0575675406  # Height of echelle grating
 
-    # ATTN: Figure this out lol
-    S_inc = 1
-
     beta = calc_beta(E)
 
-    thetas = np.linspace(0, np.pi, 5000)
+    thetas = np.linspace(0, np.pi, 10000)
 
-    R_ns = np.array([calc_R_n2(theta, beta, n, h, alpha) for theta in thetas])
-
-    power_dist = np.array([calc_distribution(theta, I, n, L, D, alpha, h, E, d, S_inc) for theta in thetas])
+    power_dist_1 = np.array([calc_distribution(theta, 1, L, D, alpha, h, E, d) for theta in thetas])
+    power_dist_2 = np.array([calc_distribution(theta, 2, L, D, alpha, h, E, d) for theta in thetas])
+    power_dist_3 = np.array([calc_distribution(theta, 3, L, D, alpha, h, E, d) for theta in thetas])
 
     thetas = thetas * 180 / np.pi
 
     fig, ax = plt.subplots()
-    ax.plot(thetas, power_dist)
+    ax.plot(thetas, power_dist_1)
+    ax.plot(thetas, power_dist_2)
+    ax.plot(thetas, power_dist_3)
 
-    ax.set_title("Estimated angular power distribution of \nSPR of diffraction order 1 along normal plane (DO NOT USE)")
+    ax.set_title("Expected angular distribution of \nSPR per electron along normal plane")
 
     ax.set_xlabel('$\\theta$ (°)')
     ax.set_ylabel('$\\frac{dN}{d\\Omega}$')
