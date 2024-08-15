@@ -73,17 +73,17 @@ def calc_distribution(theta, n, L, D, alpha, h, E, d):
 
 if __name__ == '__main__':
 
-    # n = 1           # Diffraction order
-    L = 5.74e-1     # Total grating length (m)
-    D = 6.58e-4     # Grating period (m)
-    E = 0.855       # Beam energy (GeV)
-    d = 1.27e-4      # Height of beam above grating (m)
-    alpha = np.pi / 36  # Blaze angle of echelle grating
-    h = 0.0575675406  # Height of echelle grating
+    # n = 1             # Diffraction order
+    L = 2.5e-3          # Total grating length (m)
+    D = 8.33e-7         # Grating period (m)
+    E = 2               # Beam energy (GeV)
+    d = 5e-4            # Height of beam above grating (m)
+    alpha = np.pi / 6   # Blaze angle of echelle grating
+    h = 4.81e-7    # Height of echelle grating
 
     beta = calc_beta(E)
 
-    thetas = np.linspace(0, np.pi, 10000)
+    thetas = np.linspace(0, np.pi, 1000)
 
     power_dist_1 = np.array([calc_distribution(theta, 1, L, D, alpha, h, E, d) for theta in thetas])
     power_dist_2 = np.array([calc_distribution(theta, 2, L, D, alpha, h, E, d) for theta in thetas])
@@ -92,9 +92,9 @@ if __name__ == '__main__':
     thetas = thetas * 180 / np.pi
 
     fig, ax = plt.subplots()
-    ax.plot(thetas, power_dist_1)
-    ax.plot(thetas, power_dist_2)
     ax.plot(thetas, power_dist_3)
+    ax.plot(thetas, power_dist_2)
+    ax.plot(thetas, power_dist_1)
 
     ax.set_title("Expected angular distribution of \nSPR per electron along normal plane")
 
