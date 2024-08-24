@@ -3,7 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-# from scipy.signal import savgol_filter # smooth data
+import matplotlib.colors as colors
 
 
 # Get velocity as a fraction of c from electron energy in GeV
@@ -15,7 +15,7 @@ def calc_beta(E):
 
 
 def calc_lambda(theta, phi, D, beta, n):
-    return (D / n) * (1 / beta - np.cos(theta) * np.sin(np.abs(np.pi / 2 - phi)))
+    return (D / n) * (1 / beta - np.cos(theta) * np.sin(np.pi / 2 - phi))
 
 
 def calc_lambda_e(theta, phi, beta, gamma, lambda_this):
@@ -26,7 +26,7 @@ def calc_lambda_e(theta, phi, beta, gamma, lambda_this):
 
 # Calculate R_n when phi = 0
 # theta - Angle 'up' wrt. beam
-# phi - Angle 'left
+# phi - Angle 'left/right' wrt. beam (pi / 2 is parallel)
 # Equations from https://journals.aps.org/prab/abstract/10.1103/PhysRevSTAB.8.091301
 def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
 
@@ -36,14 +36,14 @@ def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
     lambda_this = calc_lambda(theta, phi, D, beta, n)
     lambda_e = calc_lambda_e(theta, phi, beta, gamma, lambda_this)
 
-    k = 2 * np.pi * D / lambda_this # wavenumber
+    k = 2 * np.pi / lambda_this # wavenumber
     k_x = k * np.cos(phi) * np.sin(theta)
-    k_y = -1 * k * np.sin(phi)
+    k_y = k * np.sin(phi)
     k_z = k * np.cos(phi) * np.cos(theta)
 
     D_j = k / beta - k_z - k_x * np.tan(alpha) - 1j * np.tan(alpha) / lambda_e
 
-    G_bar_term_1 = N * np.array([np.tan(alpha), 2j * k_y * lambda_e * np.tan(alpha), 1])
+    G_bar_term_1 = np.array([np.tan(alpha), 2j * k_y * lambda_e * np.tan(alpha), 1])
     G_bar_term_2 = np.exp((1 / lambda_e - 1j * k_x) * h + 1j * (k / beta - k_z) * D)
     G_bar_term_3 = (np.exp(-1j * D_j * D) - 1) / (1j * D_j * D)
 
@@ -55,7 +55,10 @@ def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
     R2_par = np.abs(np.dot(eps_bar_par, G_bar))**2
     R2_perp = np.abs(np.dot(eps_bar_perp, G_bar))**2
 
-    return R2_par + R2_perp
+    if np.isnan(R2_par):
+        return 0
+    else:
+        return R2_par + R2_perp
 
     # Old
     # l = h / np.tan(alpha)
@@ -70,7 +73,7 @@ def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
 
 # Calculate angular power distribution of SPR radiation along normal plane (phi = 0)
 # theta - Angle 'up' wrt. beam direction (rad)
-# phi - Angle 'left/right' wrt. beam direction - pi/2 is parallel to beam (rad)
+# phi - Angle 'left/right' wrt. beam
 # I - Beam current (A)
 # n - Diffraction order
 # L - Total length of grating (m)
@@ -79,66 +82,59 @@ def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
 # h - Height of grating (peak to trough)
 # E - Beam energy (GeV)
 # d - Height of beam above grating (m)
-def calc_distribution(theta, phi, n, L, N, alpha, h, E, d):
-    D = L / N # grating period
+def calc_distribution(theta, phi, n, L, N, alpha, E, d):
+    D = L / N  # grating period
 
     beta = calc_beta(E)
-    gamma = 1 / np.sqrt(1 - beta**2)
+    gamma = 1 / np.sqrt(1 - beta ** 2)
 
     lambda_this = calc_lambda(theta, np.pi / 2, D, beta, n)
 
     h_int = lambda_this * beta * gamma / (4 * np.pi)
 
-    term1 = 1 / 137 * np.abs(n) * L / D
-    term2 = np.sin(theta)**2 * np.sin(np.pi / 2 - phi)**2 / (1 / beta - np.cos(theta) * np.sin(np.abs(np.pi / 2 - phi)))**2
+    term1 = 1 / 137 * np.abs(n) * N
+    term2 = np.sin(theta) ** 2 * np.sin(np.pi / 2 - phi) ** 2 / (
+                1 / beta - np.cos(theta) * np.sin(np.abs(np.pi / 2 - phi))) ** 2
     term3 = calc_R2(theta, phi, beta, gamma, N, L, n, alpha)
     term4 = np.exp(-1 * d / h_int * np.sqrt(1 + (beta * gamma * np.cos(np.pi / 2 - phi))**2))
 
-    return term1 * term2 * term3 * term4
+    return term1 * term2 * term3 * term4 if term4 != 0 else 1e-100
 
 
 if __name__ == '__main__':
 
-    # n = 1             # Diffraction order
-    L = 2.5e-2          # Total grating length (m)
-    N = 30000           # Total number of grating periods
-    E = 0.855           # Beam energy (GeV)
-    d = 1.6e-3          # Height of beam above grating (m)
-    alpha = np.pi / 36  # Blaze angle of echelle grating (rad)
-    h = 6.58e-4         # Height of echelle grating (m)
+    n = 1           # Diffraction order
+    L = 2.5e-2      # Total grating length (m)
+    N = 90000       # Total number of grating periods
+    E = 2           # Beam energy (GeV)
+    d = 1e-4        # Height of beam above grating (m)
+    alpha = 26.74   # Blaze angle of echelle grating (°)
 
     beta = calc_beta(E)
 
-    thetas = np.linspace(0, np.pi, 1000)
+    thetas, phis = np.meshgrid(np.linspace(0, np.pi, 501), np.linspace(-np.pi / 60, np.pi / 60, 501))
+    power_dist = np.array([[calc_distribution(theta, phi[0], n, L, N, alpha * np.pi / 180, E, d) for theta in thetas[0]] for phi in phis])
 
-    phi = 0
-    gamma = 1 / np.sqrt(1 - beta**2)
+    print(thetas)
+    print(phis)
+    print(power_dist)
 
-    # power_dist_1 = np.array([calc_distribution(theta, phi, 1, L, N, alpha, h, E, d) for theta in thetas])
-    # power_dist_2 = np.array([calc_distribution(theta, phi,2, L, N, alpha, h, E, d) for theta in thetas])
-    # power_dist_3 = np.array([calc_distribution(theta, phi, 3, L, N, alpha, h, E, d) for theta in thetas])
-
-
-    R_ns_1 = np.array([calc_R2(theta, phi, beta, gamma, N, L, 1, alpha) for theta in thetas])
-    R_ns_2 = np.array([calc_R2(theta, phi, beta, gamma, N, L, 2, alpha) for theta in thetas])
-    R_ns_3 = np.array([calc_R2(theta, phi, beta, gamma, N, L, 3, alpha) for theta in thetas])
+    cmap = 'magma'
 
     thetas = thetas * 180 / np.pi
+    phis = phis * 180 / np.pi
 
     fig, ax = plt.subplots()
-    # ax.plot(thetas, power_dist_3)
-    # ax.plot(thetas, power_dist_2)
-    # ax.plot(thetas, power_dist_1)
+    chart = ax.pcolormesh(phis, thetas, power_dist, norm=colors.LogNorm(vmin=1e-10, vmax=1e4), cmap=cmap)
 
-    ax.plot(thetas, R_ns_3)
-    ax.plot(thetas, R_ns_2)
-    ax.plot(thetas, R_ns_1)
+    cbar = fig.colorbar(chart)
+    cbar.set_label('$\\frac{dN}{d\\Omega}$', rotation=0, labelpad=12)
 
     ax.set_title("Expected angular distribution of \nSPR per electron along normal plane")
 
-    ax.set_xlabel('$\\theta$ (°)')
-    ax.set_ylabel('$\\frac{dN}{d\\Omega}$')
+    ax.set_xlabel('$\\phi$ (°)')
+    ax.set_ylabel('$\\theta$ (°)')
 
-    plt.yscale("log")
+    plt.suptitle(f'$n = {n}$, $L = {L * 1e3}$mm, $N = {N}$,\n$E = {E}$ GeV, $d= {d * 1e3}$mm, $\\alpha = {alpha}°$', x=0.432, y=0.85, color='white', fontsize=10)
 
     plt.show()
