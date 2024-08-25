@@ -1,6 +1,7 @@
 # Calculates, graphs angular power distribution of emitted SPR
 
 
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -103,14 +104,15 @@ def calc_distribution(theta, phi, n, L, N, alpha, E, d):
 
 if __name__ == '__main__':
 
-    n = 1           # Diffraction order
-    L = 2.5e-2      # Total grating length (m)
-    N = 90000       # Total number of grating periods
-    E = 2           # Beam energy (GeV)
-    d = 1e-4        # Height of beam above grating (m)
-    alpha = 26.74   # Blaze angle of echelle grating (°)
+    # filepath_img = input('Enter file path for graph: ')
+    # filepath_data = input('Enter file path for JSON data: ')
 
-    beta = calc_beta(E)
+    n = int(input('Enter diffraction order: '))
+    L = float(input('Enter total length of grating in m: '))
+    N = int(input('Enter total number of grating periods: '))
+    E = float(input('Enter beam energy in GeV: '))
+    d = float(input('Enter height of beam above grating in m: '))
+    alpha = float(input('Enter blaze angle of echelle grating in °: '))
 
     thetas, phis = np.meshgrid(np.linspace(0, np.pi, 501), np.linspace(-np.pi / 60, np.pi / 60, 501))
     power_dist = np.array([[calc_distribution(theta, phi[0], n, L, N, alpha * np.pi / 180, E, d) for theta in thetas[0]] for phi in phis])
@@ -125,16 +127,21 @@ if __name__ == '__main__':
     phis = phis * 180 / np.pi
 
     fig, ax = plt.subplots()
-    chart = ax.pcolormesh(phis, thetas, power_dist, norm=colors.LogNorm(vmin=1e-10, vmax=1e4), cmap=cmap)
+    chart = ax.pcolormesh(phis, thetas, power_dist, norm=colors.LogNorm(vmin=1e-10, vmax=1e5), cmap=cmap)
 
     cbar = fig.colorbar(chart)
-    cbar.set_label('$\\frac{dN}{d\\Omega}$', rotation=0, labelpad=12)
+    cbar.set_label('$\\frac{dN_\\gamma}{d\\Omega}$', rotation=0, labelpad=12)
 
     ax.set_title("Expected angular distribution of \nSPR per electron along normal plane")
 
     ax.set_xlabel('$\\phi$ (°)')
     ax.set_ylabel('$\\theta$ (°)')
 
-    plt.suptitle(f'$n = {n}$, $L = {L * 1e3}$mm, $N = {N}$,\n$E = {E}$ GeV, $d= {d * 1e3}$mm, $\\alpha = {alpha}°$', x=0.432, y=0.85, color='white', fontsize=10)
+    plt.suptitle(f'$n = {n}$, $L = {L * 1e3}$mm, $N_ = {N}$,\n$E = {E}$ GeV, $d= {d * 1e3}$mm, $\\alpha = {alpha}°$', x=0.432, y=0.85, color='white', fontsize=10)
 
     plt.show()
+
+    # fig.savefig(filepath_img)
+
+    # with open(filepath_data, 'w') as f:
+    #     f.write(json.dumps(power_dist.tolist()))
