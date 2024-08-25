@@ -46,4 +46,4 @@ if __name__ == '__main__':
             if dist_3d(coord_current, detector_center_coords) <= detector_radius / detector_distance:
                 result += data[i][j] * get_solid_angle(theta)
 
-    print(result)
+    print(f'Expected photons detected per second per electron: {result}')
