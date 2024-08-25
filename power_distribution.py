@@ -105,7 +105,7 @@ def calc_distribution(theta, phi, n, L, N, alpha, E, d):
 if __name__ == '__main__':
 
     # filepath_img = input('Enter file path for graph: ')
-    # filepath_data = input('Enter file path for JSON data: ')
+    filepath_data = input('Enter file path for JSON data: ')
 
     n = int(input('Enter diffraction order: '))
     L = float(input('Enter total length of grating in m: '))
@@ -143,5 +143,5 @@ if __name__ == '__main__':
 
     # fig.savefig(filepath_img)
 
-    # with open(filepath_data, 'w') as f:
-    #     f.write(json.dumps(power_dist.tolist()))
+    with open(filepath_data, 'w') as f:
+        f.write(json.dumps(power_dist.tolist()))
