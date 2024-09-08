@@ -1,10 +1,6 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-import pprint
-
-#ax = plt.figure().add_subplot(projection='3d')
 
 N=int(input('N?'))
 resolution=float(input('resolution?'))
@@ -71,32 +67,14 @@ efield = np.array([[[intialCond(i*resolution,j*resolution,k*resolution) for k in
 #make list of points for magnetic field
 mfield = np.array([[[[0,0,0] for k in range(-N,N)] for j in range(-N,N)] for i in range(-N,N)])
 
-#time step function
-#def step():
-    #time derivative of electric field
-    #efield = [[[[(efield[i][j][k][xyz]-curl(efield,0,2*N,2*N)[i][j][k][xyz] for xyz in range(2))] for k in range(2*N)] for j in range(2*N)] for i in range(2*N)]
-    #time derivative of magnetic field
-    #mfield = [[[[(mfield[i][j][k][xyz]+(1/epislon0)*(((curl(mfield,-1,2*N,2*N-1)[i][j][k][xyz])/mu0)-J[i][j][k][xyz])) for xyz in range(2)] for k in range(2*N)] for j in range(2*N)] for i in range(2*N)]
-
-
-# Make the grid
-#x, y, z = np.meshgrid(np.arange(-N, N+1, 1),
-                    #  np.arange(-N, N+1, 1),
-                    #  np.arange(-N, N+1, 1))
-
-# Make the direction data for the arrows
-#u = kBoltz*q*x/((x**2+y**2+z**2)**(3/2))
-#v = kBoltz*q*y/((x**2+y**2+z**2)**(3/2))
-#w = kBoltz*q*z/((x**2+y**2+z**2)**(3/2))
-
-#ax.quiver(x, y, z, u, v, w, length=1, normalize=True)
-
 plt.savefig('plot.png')
 
 iterations=int(input('iterations?'))
 
 while iterations>0:
     print(iterations)
+    print(p0)
+    print(v0)
     #time derivative of magnetic field
     mfield = mfield - timestep * curl(efield,0,2*N,2*N)
     #efield = [[[[(efield[i][j][k][xyz]-timestep*curl(efield,0,2*N,2*N)[i][j][k][xyz] for xyz in range(2))] for k in range(2*N)] for j in range(2*N)] for i in range(2*N)]
@@ -109,4 +87,22 @@ while iterations>0:
     p0 = p0 + timestep * v0
     #update current density
     J = [[[Jcheck(i,j,k) for k in range(-N,N+1)] for j in range(-N,N+1)] for i in range(-N,N+1)]
-    iterations =- 1
+    iterations -= 1
+print(iterations)
+print(p0)
+print(v0)
+
+ax = plt.figure().add_subplot(projection='3d')
+
+#Make the grid
+x, y, z = np.meshgrid(np.arange(-N, N, 1),
+                      np.arange(-N, N, 1),
+                      np.arange(-N, N, 1))
+#Make the direction data for the arrows
+u = np.array([[[mfield[int(x[i][j][k]+N)][int(y[i][j][k]+N)][int(z[i][j][k]+N)][0] for k in range(-N,N)] for j in range(-N,N)] for i in range(-N,N)])
+v = np.array([[[mfield[int(x[i][j][k]+N)][int(y[i][j][k]+N)][int(z[i][j][k]+N)][1] for k in range(-N,N)] for j in range(-N,N)] for i in range(-N,N)])
+w = np.array([[[mfield[int(x[i][j][k]+N)][int(y[i][j][k]+N)][int(z[i][j][k]+N)][2] for k in range(-N,N)] for j in range(-N,N)] for i in range(-N,N)])
+
+#plots the current magnetic field (super hard to see lol, can't even tell if its right)
+ax.quiver(x, y, z, u, v, w, length=1/resolution, normalize=True)
+plt.savefig('plot.png')
