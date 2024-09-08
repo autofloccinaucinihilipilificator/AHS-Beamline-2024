@@ -44,9 +44,15 @@ def calc_R2(theta, phi, beta, gamma, N, L, n, alpha):
 
     D_j = k / beta - k_z - k_x * np.tan(alpha) - 1j * np.tan(alpha) / lambda_e
 
+    iDD_j = 1j *D * D_j
+
+    # G_bar_term_1 = np.array([np.tan(alpha), 2j * k_y * lambda_e * np.tan(alpha), 1])
+    # G_bar_term_2 = np.exp((1 / lambda_e - 1j * k_x) * h + 1j * (k / beta - k_z) * D)
+    # G_bar_term_3 = (np.exp(-1j * D_j * D) - 1) / (1j * D_j * D)
+
     G_bar_term_1 = np.array([np.tan(alpha), 2j * k_y * lambda_e * np.tan(alpha), 1])
-    G_bar_term_2 = np.exp((1 / lambda_e - 1j * k_x) * h + 1j * (k / beta - k_z) * D)
-    G_bar_term_3 = (np.exp(-1j * D_j * D) - 1) / (1j * D_j * D)
+    G_bar_term_2 = np.exp(iDD_j)
+    G_bar_term_3 = (np.exp(-1 * iDD_j) - 1) / iDD_j
 
     G_bar = G_bar_term_1 * G_bar_term_2 * G_bar_term_3
 
@@ -94,10 +100,10 @@ def calc_distribution(theta, phi, n, L, N, alpha, E, d):
     h_int = lambda_this * beta * gamma / (4 * np.pi)
 
     term1 = 1 / 137 * np.abs(n) * N
-    term2 = np.sin(theta) ** 2 * np.sin(np.pi / 2 - phi) ** 2 / (
-                1 / beta - np.cos(theta) * np.sin(np.abs(np.pi / 2 - phi))) ** 2
+    term2 = np.sin(theta)**2 * np.cos(phi)**2 / ( # cos instead of sin because different phi
+                1 / beta - np.cos(theta) * np.cos(phi))**2
     term3 = calc_R2(theta, phi, beta, gamma, N, L, n, alpha)
-    term4 = np.exp(-1 * d / h_int * np.sqrt(1 + (beta * gamma * np.cos(np.pi / 2 - phi))**2))
+    term4 = np.exp(-1 * d / h_int * np.sqrt(1 + (beta * gamma * np.sin(phi))**2))
 
     return term1 * term2 * term3 * term4 if term4 != 0 else 1e-100
 

@@ -25,10 +25,10 @@ if __name__ == '__main__':
     with open(filepath, 'r') as f:
         data = json.loads(f.read())
 
-    detector_center_theta = float(input('Enter theta of center of detector: '))
-    detector_center_phi = float(input('Enter phi of center of detector: '))
-    detector_distance = float(input('Enter distance between detector and grating: '))
-    detector_radius = float(input('Enter radius of detector: '))
+    detector_center_theta = float(input('Enter theta of center of detector: ')) * np.pi / 180
+    detector_center_phi = float(input('Enter phi of center of detector: ')) * np.pi / 180
+    detector_distance = float(input('Enter distance between detector and grating (cm): '))
+    detector_radius = float(input('Enter radius of detector (cm): '))
 
     phis, thetas = np.meshgrid(np.linspace(-np.pi / 60, np.pi / 60, 501), np.linspace(0, np.pi, 501))
 
